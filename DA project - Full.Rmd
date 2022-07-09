@@ -1,0 +1,667 @@
+---
+title: "DA Project"
+author: "Rathnapriya Gopalakrishnan"
+date: "4/21/2022"
+output:
+  word_document: default
+  html_document: default
+---
+# Data Storage 
+## Importing Dataset
+```{r}
+df = read.csv("C:/Users/Priya/Desktop/heart_2020_cleaned.csv")
+head(df)
+unalteredDf = df
+```
+# Data Cleaning
+
+## Checking for missing values
+```{r}
+sum(is.na(df))
+```
+
+No missing values to handle
+
+# Data Exploration
+```{r}
+str(df)
+```
+
+```{r}
+summary(df)
+```
+
+# Feature Engineering
+## Extracting the continuous and categorical features
+
+```{r}
+numeric_df <- df[, sapply(df, class) == "numeric"]
+head(numeric_df)
+```
+
+```{r}
+cat_df <- df[, sapply(df, class) == "character"]
+head(cat_df)
+```
+```{r}
+df$Smoking = as.factor(df$Smoking)
+df$AlcoholDrinking = as.factor(df$Smoking)
+df$Stroke = as.factor(df$Stroke)
+df$DiffWalking = as.factor(df$DiffWalking)
+df$Sex = as.factor(df$Sex)
+df$AgeCategory = as.factor(df$AgeCategory)
+df$Race = as.factor(df$Race)
+df$Diabetic = as.factor(df$Diabetic)
+df$PhysicalActivity = as.factor(df$PhysicalActivity)
+df$GenHealth = as.factor(df$GenHealth)
+df$Asthma = as.factor(df$Asthma)
+df$KidneyDisease = as.factor(df$KidneyDisease)
+df$SkinCancer = as.factor(df$SkinCancer)
+#df$HD = ifelse (df$HeartDisease=="Yes",1,0)
+df$HeartDisease = factor(df$HeartDisease,levels = c("No","Yes"),labels = c(0,1))
+```
+
+```{r}
+head(df$HeartDisease)
+```
+
+
+
+```{r}
+str(df)
+```
+
+
+
+```{r}
+cor(numeric_df)
+```
+
+```{r}
+library(corrplot)
+corrplot(cor(numeric_df),method='color')
+```
+
+
+# Data Visualization
+
+## For continuous variables
+```{r}
+boxplot(numeric_df)
+```
+
+## How each continuous variable differs for different values of Heart Disease
+
+```{r}
+par(mfrow=c(2,2))
+boxplot(df$BMI~ df$HeartDisease)
+boxplot(df$PhysicalHealth~ df$HeartDisease)
+boxplot(df$MentalHealth~ df$HeartDisease)
+boxplot(df$SleepTime~ df$HeartDisease)
+```
+
+
+## Histogram of continuous variables
+```{r}
+par(mfrow=c(2,2))
+hist(numeric_df$BMI)
+hist(numeric_df$PhysicalHealth)
+hist(numeric_df$MentalHealth)
+hist(numeric_df$SleepTime)
+```
+
+## For categorical variables
+
+## Frequency of classes for each categorical variable
+```{r}
+library(ggplot2)
+ggplot(df) + geom_bar(aes(x = HeartDisease, fill=HeartDisease))
+ggplot(df) + geom_bar(aes(x = Smoking, fill=Smoking))
+ggplot(df) + geom_bar(aes(x = AlcoholDrinking, fill=AlcoholDrinking))
+ggplot(df) + geom_bar(aes(x = Stroke, fill=Stroke))
+ggplot(df) + geom_bar(aes(x = DiffWalking, fill=DiffWalking))
+ggplot(df) + geom_bar(aes(x = Sex, fill=Sex))
+ggplot(df) + geom_bar(aes(x = AgeCategory, fill=AgeCategory))
+ggplot(df) + geom_bar(aes(x = Race, fill=Race))
+ggplot(df) + geom_bar(aes(x = Diabetic, fill=Diabetic))
+ggplot(df) + geom_bar(aes(x = PhysicalActivity, fill=PhysicalActivity))
+ggplot(df) + geom_bar(aes(x = GenHealth, fill=GenHealth))
+ggplot(df) + geom_bar(aes(x = Asthma, fill=Asthma))
+ggplot(df) + geom_bar(aes(x = KidneyDisease, fill=KidneyDisease))
+ggplot(df) + geom_bar(aes(x = SkinCancer, fill=SkinCancer))
+```
+
+
+## Frequency of Heart Disease in each class of categorical variables 
+```{r}
+library(ggplot2)
+ggplot(df) + geom_bar(aes(x = HeartDisease, fill=HeartDisease))
+ggplot(df) + geom_bar(aes(x = Smoking, fill=HeartDisease))
+ggplot(df) + geom_bar(aes(x = AlcoholDrinking, fill=HeartDisease))
+ggplot(df) + geom_bar(aes(x = Stroke, fill=HeartDisease))
+ggplot(df) + geom_bar(aes(x = DiffWalking, fill=HeartDisease))
+ggplot(df) + geom_bar(aes(x = Sex, fill=HeartDisease))
+ggplot(df) + geom_bar(aes(x = AgeCategory, fill=HeartDisease))
+ggplot(df) + geom_bar(aes(x = Race, fill=HeartDisease))
+ggplot(df) + geom_bar(aes(x = Diabetic, fill=HeartDisease))
+ggplot(df) + geom_bar(aes(x = PhysicalActivity, fill=HeartDisease))
+ggplot(df) + geom_bar(aes(x = GenHealth, fill=HeartDisease))
+ggplot(df) + geom_bar(aes(x = Asthma, fill=HeartDisease))
+ggplot(df) + geom_bar(aes(x = KidneyDisease, fill=HeartDisease))
+ggplot(df) + geom_bar(aes(x = SkinCancer, fill=HeartDisease))
+```
+
+# Sampling
+## We have an imbalance in the data
+
+No of records in each class of the target variable before sampling
+```{r}
+table(df$HeartDisease)
+```
+
+## Performing Undersampling
+
+```{r}
+library(ROSE)
+library(TeachingDemos)
+set.seed(char2seed("Priya"))
+balanced_df_under = ovun.sample(HeartDisease~., 
+                          data=df,
+                          method = "under")$data
+```
+
+No of records in each class of the target variable after undersampling
+```{r}
+table(balanced_df_under$HeartDisease)
+```
+
+## Performing Oversampling
+```{r}
+library(TeachingDemos)
+set.seed(char2seed("Priya"))
+balanced_df_over = ovun.sample(HeartDisease~., 
+                          data=df,
+                          method = "over")$data
+```
+
+
+No of records in each class of the target variable after oversampling
+```{r}
+table(balanced_df_over$HeartDisease)
+```
+
+
+
+```{r}
+
+MLdf=balanced_df_under
+
+
+# MLdf0 = subset(MLdf, HeartDisease==0)
+# MLdf1 = subset(MLdf, HeartDisease==1)
+# MLdf0 = MLdf0[1:500,]
+# MLdf1 = MLdf1[1:500,]
+# 
+# MLdf = rbind(MLdf0, MLdf1)
+
+
+# MLdf=balanced_df_under[1:1000,]
+
+nrow(MLdf)
+ncol(MLdf)
+```
+
+
+# Machine Learning
+## Forming train and test sets
+```{r}
+library(TeachingDemos)
+set.seed(char2seed("Priya"))
+train = sample(nrow(MLdf), size = 0.8*nrow(MLdf))
+head(MLdf)
+```
+
+Removing HD column
+```{r}
+#MLdf = subset(MLdf, select = -c(HD))
+```
+
+```{r}
+trainDf = MLdf[train,]
+testDf = MLdf[-train,]
+```
+
+Extracting Train and Test sets
+```{r}
+trainMldf = MLdf[train,]
+testMldf = MLdf[-train,]
+Xtrain = trainDf[,-c(1)]
+Xtest =  testDf[,-c(1)]
+ytrain = trainDf$HeartDisease
+ytest = testDf$HeartDisease
+```
+
+
+## Logistic Regression
+
+```{r}
+head(MLdf)
+```
+
+```{r}
+str(MLdf)
+```
+
+
+```{r}
+library(gbm)
+
+log_mod = glm(HeartDisease~., data=trainMldf, family="binomial")
+summary(log_mod)
+
+```
+
+
+Function to extract evaluation metrics
+```{r}
+
+met <- function(cm){
+  print(cm)
+  met_list = list( "Acc" =cm$overall['Accuracy'], "Spec" = cm$byClass['Specificity'], "Sens" = cm$byClass['Sensitivity'])
+  return (met_list)
+}
+
+```
+
+
+
+
+```{r}
+proba = predict(log_mod, testMldf, type = "response")
+pred = ifelse(proba>0.5, 1,0)
+
+```
+
+```{r}
+mean(pred!=testMldf$HeartDisease)
+```
+
+
+```{r}
+library(caret)
+
+pred = factor(pred, levels=c(0,1), labels=c("X0","X1"))
+testMldf$HeartDisease = factor(testMldf$HeartDisease, levels=c(0,1), labels=c("X0","X1"))
+
+cm_glm= confusionMatrix(pred,testMldf$HeartDisease, positive='X1' )
+eval_glm = met(cm_glm)
+print(cm_glm)
+```
+
+
+
+```{r}
+library(pROC)
+roc_glm = roc(testMldf$HeartDisease , proba)
+plot(roc_glm, main = "ROC Curve for Logistic Regression")
+```
+
+
+## Random Forest
+
+
+
+
+Converting train and test categorical variables to factors
+```{r}
+levels(trainMldf$HeartDisease) <- make.names(levels(factor(trainMldf$HeartDisease)))
+
+levels(trainMldf$Smoking) <- make.names(levels(factor(trainMldf$Smoking)))
+
+levels(trainMldf$AlcoholDrinking) <- make.names(levels(factor(trainMldf$AlcoholDrinking)))
+
+levels(trainMldf$Stroke) <- make.names(levels(factor(trainMldf$Stroke)))
+
+levels(trainMldf$DiffWalking) <- make.names(levels(factor(trainMldf$DiffWalking)))
+
+levels(trainMldf$Sex) <- make.names(levels(factor(trainMldf$Sex)))
+
+levels(trainMldf$AgeCategory) <- make.names(levels(factor(trainMldf$AgeCategory)))
+
+levels(trainMldf$Race) <- make.names(levels(factor(trainMldf$Race)))
+
+levels(trainMldf$Diabetic) <- make.names(levels(factor(trainMldf$Diabetic)))
+
+levels(trainMldf$PhysicalActivity) <- make.names(levels(factor(trainMldf$PhysicalActivity)))
+
+levels(trainMldf$GenHealth) <- make.names(levels(factor(trainMldf$GenHealth)))
+
+levels(trainMldf$Asthma) <- make.names(levels(factor(trainMldf$Asthma)))
+
+levels(trainMldf$KidneyDisease) <- make.names(levels(factor(trainMldf$KidneyDisease)))
+
+levels(trainMldf$SkinCancer) <- make.names(levels(factor(trainMldf$SkinCancer)))
+```
+
+```{r}
+
+
+levels(testMldf$HeartDisease) <- make.names(levels(factor(testMldf$HeartDisease)))
+
+levels(testMldf$Smoking) <- make.names(levels(factor(testMldf$Smoking)))
+
+levels(testMldf$AlcoholDrinking) <- make.names(levels(factor(testMldf$AlcoholDrinking)))
+
+levels(testMldf$Stroke) <- make.names(levels(factor(testMldf$Stroke)))
+
+levels(testMldf$DiffWalking) <- make.names(levels(factor(testMldf$DiffWalking)))
+
+levels(testMldf$Sex) <- make.names(levels(factor(testMldf$Sex)))
+
+levels(testMldf$AgeCategory) <- make.names(levels(factor(testMldf$AgeCategory)))
+
+levels(testMldf$Race) <- make.names(levels(factor(testMldf$Race)))
+
+levels(testMldf$Diabetic) <- make.names(levels(factor(testMldf$Diabetic)))
+
+levels(testMldf$PhysicalActivity) <- make.names(levels(factor(testMldf$PhysicalActivity)))
+
+levels(testMldf$GenHealth) <- make.names(levels(factor(testMldf$GenHealth)))
+
+levels(testMldf$Asthma) <- make.names(levels(factor(testMldf$Asthma)))
+
+levels(testMldf$KidneyDisease) <- make.names(levels(factor(testMldf$KidneyDisease)))
+
+levels(testMldf$SkinCancer) <- make.names(levels(factor(testMldf$SkinCancer)))
+
+```
+
+
+
+
+
+
+
+```{r}
+library(randomForest)
+library(caret)
+
+library(TeachingDemos)
+set.seed(char2seed("Priya"))
+
+x = trainControl(method = "cv", number = 3, classProbs = TRUE, summaryFunction = twoClassSummary)
+
+rf_mod_1 <- train(HeartDisease~. , data = trainMldf, method = "rf", trControl = x,  metric = "ROC")
+print(rf_mod_1)
+```
+
+```{r}
+plot(rf_mod_1)
+```
+
+
+```{r}
+mtry = rf_mod_1$bestTune[1,]
+rf_mod <- randomForest(HeartDisease ~ . , data= trainMldf, mtry=mtry, importance=TRUE)
+summary(rf_mod)
+
+```
+
+
+```{r}
+varImp(rf_mod)
+```
+
+
+```{r}
+varImpPlot(rf_mod)
+```
+
+
+```{r}
+# testMldf$HeartDisease = factor(testMldf$HeartDisease, levels = levels(trainMldf$HeartDisease))
+levels(testMldf$HeartDisease) = levels(trainMldf$HeartDisease)
+yPredRf_proba_old = predict(rf_mod, newdata = testMldf, type='prob')
+
+yPredRf_proba = yPredRf_proba_old[,1]
+yPredRf = rep(1,length(yPredRf_proba))
+yPredRf[yPredRf_proba > 0.5] = 0
+length(yPredRf_proba)
+
+# err_table_rf = table(testMldf$HeartDisease, yPredRf)
+# print(err_table_rf)
+# test_err_rf = err_table_rf[2,2]/(err_table_rf[1,2]+err_table_rf[2,2])
+yPredRf = factor(yPredRf, levels=c(0,1), labels=c("X0","X1"))
+mean(yPredRf!=testMldf$HeartDisease)
+
+```
+
+
+```{r}
+cm_rf = confusionMatrix(yPredRf,testMldf$HeartDisease,positive='X1' )
+eval_rf = met(cm_rf)
+print(cm_rf)
+```
+
+```{r}
+library(pROC)
+roc_rf = roc(testMldf$HeartDisease , yPredRf_proba_old[,2])
+plot(roc_rf, main = "ROC Curve for Random Forest")
+```
+
+
+## Decision Tree
+```{r}
+library(tree)
+r_tree = tree(HeartDisease~., data =trainMldf)
+summary(r_tree)
+```
+
+```{r}
+plot(r_tree)
+text(r_tree, pretty=3)
+
+```
+
+
+
+```{r}
+yPredTree_proba_old  = predict(r_tree, newdata = testMldf)
+yPredTree_proba  = yPredTree_proba_old
+yPredTree_proba = yPredTree_proba[,1]
+yPredTree = rep(1,length(yPredTree_proba))
+yPredTree[yPredTree_proba > 0.5] = 0
+# length(yPredTree_proba)
+# 
+# err_table_tree = table(testMldf$HeartDisease, yPredTree)
+# print(err_table_tree)
+# test_err_tree = err_table_tree[2,2]/(err_table_tree[1,2]+err_table_tree[2,2])
+# print(test_err_tree)
+mean(yPredTree!=testMldf$HeartDisease)
+yPredTree = factor(yPredTree, levels=c(0,1), labels=c("X0","X1"))
+```
+
+
+```{r}
+cm_dt = confusionMatrix(yPredTree,testMldf$HeartDisease )
+eval_dt = met(cm_dt)
+print(cm_dt)
+```
+
+
+
+```{r}
+
+library(pROC)
+roc_tree = roc(testMldf$HeartDisease , yPredTree_proba_old[,2])
+plot(roc_tree, main = "ROC Curve for Decision Tree")
+```
+
+
+## KNN
+```{r}
+library(caret)
+
+Xtrain = unalteredDf[,-c(1)]
+Xtest = unalteredDf[,-c(1)]
+#unalteredDf$HeartDisease = as.factor(unalteredDf$HeartDisease)
+ytrain = unalteredDf[,1]
+ytest = unalteredDf[,1]
+
+```
+
+
+```{r}
+library(caret)
+
+library(TeachingDemos)
+set.seed(char2seed("Priya"))
+x = trainControl(method = "cv", number = 3, classProbs = TRUE, summaryFunction = twoClassSummary)
+
+knn_mod <- train(HeartDisease~. , data = trainMldf, method = "knn", preProcess = c("center","scale"), trControl = x,  metric = "ROC")
+
+print(knn_mod)
+```
+
+
+
+
+```{r}
+plot(knn_mod)
+```
+
+
+
+
+```{r}
+yPredKNN_proba_old <- predict(knn_mod,testMldf, type = "prob")
+yPredKNN_proba <- yPredKNN_proba_old
+
+yPredKNN_proba = yPredKNN_proba[,1]
+yPredKNN = rep(1,length(yPredKNN_proba))
+yPredKNN[yPredKNN_proba > 0.5] = 0
+# length(yPredKNN_proba)
+# 
+# err_table_KNN = table(testMldf$HeartDisease, yPredKNN)
+# print(err_table_KNN)
+# test_err_knn = err_table_KNN[2,2]/(err_table_KNN[1,2]+err_table_KNN[2,2])
+# print(test_err_knn)
+mean(yPredKNN!=testMldf$HeartDisease)
+yPredKNN = factor(yPredKNN, levels=c(0,1), labels=c("X0","X1"))
+```
+
+
+```{r}
+cm_knn = confusionMatrix(yPredKNN,testMldf$HeartDisease, positive='X1' )
+eval_knn = met(cm_knn)
+print(cm_knn)
+```
+
+
+```{r}
+
+library(pROC)
+roc_knn = roc(testMldf$HeartDisease , yPredKNN_proba_old[,2])
+plot(roc_knn, main = "ROC Curve for KNN")
+```
+
+## SVM
+
+```{r}
+library(e1071)
+
+svm_mod = svm(HeartDisease ~ .,data = trainMldf,kernel = 'linear', probability=TRUE)
+summary(svm_mod)
+
+```
+
+
+
+```{r}
+yPredSVM = predict(svm_mod, newdata = testMldf, probability=TRUE)
+yPredSVm_proba_old  = attr(yPredSVM, "probabilities")[,2]
+# err_table_SVM = table(testMldf$HeartDisease, yPredSVM)
+# print(err_table_SVM)
+# 
+# test_err_svm = err_table_SVM[2,2]/(err_table_SVM[1,2]+err_table_SVM[2,2])
+# print(test_err_svm)
+mean(yPredSVM!=testMldf$HeartDisease)
+
+
+
+```
+
+
+```{r}
+cm_svm = confusionMatrix(yPredSVM,testMldf$HeartDisease, positive = "X1" )
+eval_svm = met(cm_svm)
+print(cm_svm)
+```
+
+```{r}
+library(pROC)
+SVMROC <- roc(testMldf$HeartDisease,yPredSVm_proba_old)
+plot(SVMROC,  main = "ROC Curve for SVM")
+```
+
+
+```{r} 
+eval_acc = c(eval_glm$Acc, eval_rf$Acc,  eval_dt$Acc, eval_knn$Acc, eval_svm$Acc)
+models = c("GLM","RF","DT","KNN","SVM")
+plot_df = data.frame(
+name=models,
+value = eval_acc
+)
+ggplot(plot_df, aes(x=name, y=value, fill=name)) + 
+  geom_bar(stat = "identity")+
+  labs(title = "Accuracy", y = "Accuracy", fill = "Models")
+```
+```{r}
+eval_sens = c(eval_glm$Sens, eval_rf$Sens,  eval_dt$Sens, eval_knn$Sens, eval_svm$Sens)
+eval_spec = c(eval_glm$Spec, eval_rf$Spec,  eval_dt$Spec, eval_knn$Spec, eval_svm$Spec)
+
+plot_eval_df =  data.frame(
+Models = models,
+Accuracy=eval_acc,
+Sensitivity = eval_sens,
+Specificity = eval_spec
+)
+# ggplot(plot_eval_df, aes(fill=models, y=value, x=models)) + 
+#     geom_bar(position="dodge", stat="identity")
+
+
+```
+
+
+```{r}
+plot_eval_data <- data.frame(Value = c(eval_acc, eval_sens, eval_spec),  # Create example data
+                   Model = rep(c("GLM",
+                                 "RF",
+                                 "DT",
+                                 "KNN",
+                                 "SVM"
+                                 ),
+                               times = 3),
+                   Metric = c(rep(c("Accuracy"),5),
+                                rep(c("Sensitivity"),5),
+                                rep(c("Specificity"),5)
+                                )
+)
+
+
+
+
+print(plot_eval_data)
+
+```
+
+
+```{r}
+ggplot(plot_eval_data, aes(fill=Metric, y=Value, x=Model)) + 
+    geom_bar(position="dodge", stat="identity")+labs(title = "Evaluation Metrics")
+      
+```
+
+
+
+
